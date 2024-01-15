@@ -1,0 +1,153 @@
+---
+title: "Analyzing the Number of Toronto Marriage Licenses in 2023"
+author: "Tam Ly"
+format: html
+bibliography: references.bib
+---
+
+```{r}
+#### Preamble ####
+# Purpose: Obtain and prepare data on the number of Toronto marriage 
+# licenses in 2023.
+# Author: Tam Ly
+# Email: annatn.ly@mail.utoronto.ca
+# Date: 16 Jan 24
+# Prerequisites: Need to know where to get Toronto marriage license
+# data.
+```
+
+We will use the R programming language [@citeR], and load the packages tidyverse [@tidyverse], janitor [@janitor], and opendatatoronto [@opendatatoronto]. We will follow Chapter 2 and 3 of *Telling Stories with Data* [@tellingstories].
+
+```{r}
+#### Workplace setup ####
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("opendatatoronto")
+library(tidyverse)
+library(janitor)
+library(opendatatoronto)
+```
+# Plan
+
+```{r}
+#### Plan ####
+```
+
+# Simulate
+
+```{r}
+#### Simulate ####
+```
+
+# Acquire
+
+```{r}
+#### Acquire ####
+# Read in the data
+toronto_marriages <-
+  list_package_resources("e28bc818-43d5-43f7-b5d9-bdfb4eda5feb") |> 
+  filter(name == "Marriage Licence Statistics Data.csv") |> 
+  get_resource()
+
+# Save the data
+write_csv(
+  x = toronto_marriages,
+  file = "toronto_marriages.csv"
+)
+
+head(toronto_marriages)
+```
+
+```{r}
+# Keep rows for year 2023 only
+# Keep columns for month and number of marriage licenses
+cleaned_toronto_marriages <-
+  clean_names(toronto_marriages) |> 
+  slice(505:528) |> 
+  select(marriage_licenses, time_period)
+
+head(cleaned_toronto_marriages)
+```
+
+```{r}
+# Change format of months from digits to name
+cleaned_toronto_marriages <-
+  cleaned_toronto_marriages |> 
+  mutate(
+    time_period =
+      case_match(
+        time_period,
+        "2023-01" ~ "January",
+        "2023-02" ~ "February",
+        "2023-03" ~ "March",
+        "2023-04" ~ "April",
+        "2023-05" ~ "May",
+        "2023-06" ~ "June",
+        "2023-07" ~ "July",
+        "2023-08" ~ "August",
+        "2023-09" ~ "September",
+        "2023-10" ~ "October",
+        "2023-11" ~ "November",
+        "2023-12" ~ "December",
+      )
+  )
+
+head(cleaned_toronto_marriages)
+```
+
+```{r}
+# Save the cleaned file
+write_csv(
+  x = cleaned_toronto_marriages,
+  file = "cleaned_toronto_marriages.csv"
+)
+```
+
+# Explore
+
+```{r}
+#### Explore ####
+# Read in the cleaned data
+cleaned_toronto_marriages <-
+  read_csv(
+    file = "cleaned_toronto_marriages.csv",
+    show_col_types = FALSE
+  )
+```
+
+```{r}
+# Sum up the number of marriages per month
+cleaned_toronto_marriages <-
+  cleaned_toronto_marriages |> 
+  group_by(time_period) |> 
+  summarize(number_marriages = sum(marriage_licenses))
+
+head(cleaned_toronto_marriages)
+```
+
+```{r}
+# Arrange the months in chronological order
+cleaned_toronto_marriages |> 
+  mutate(month = factor(time_period, levels = month.name)) |> 
+  arrange(month) |> 
+  select(month, number_marriages)
+```
+
+```{r}
+# Build a bar graph
+cleaned_toronto_marriages |> 
+  mutate(month = factor(time_period, levels = month.name, labels
+  = month.abb)) |> 
+  ggplot(aes(x = month, y = number_marriages)) +
+  geom_col() +
+  theme_minimal() +
+  labs(x = "Month", y = "Number of Marriage Licenses")
+```
+
+# Share
+
+```{r}
+#### Share ####
+```
+
+# References
